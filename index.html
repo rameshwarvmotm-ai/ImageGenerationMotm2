@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AI Image Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-color: #764ba2;
+            --text-color: #2d3748;
+            --text-light: #718096;
+            --input-bg: rgba(255, 255, 255, 0.5);
+            --input-focus-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+
+        /* Main Container with Glassmorphism */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 30px;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+            /* Prevent flex overflow */
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        /* Inputs & Textareas */
+        textarea,
+        input[type="text"],
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        textarea:focus,
+        input[type="text"]:focus,
+        .modal-input:focus {
+            outline: none;
+            background: var(--input-focus-bg);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        /* File Uploads */
+        .upload-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .upload-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .custom-file-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .custom-file-input:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Buttons */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+        }
+
+        button.primary:hover {
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        button.ghost {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-color);
+        }
+
+        button.ghost:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Carousel */
+        .carousel {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 5px 20px 5px;
+            scroll-behavior: smooth;
+        }
+
+        .card {
+            min-width: 140px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 16px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .card.selected {
+            border-color: var(--accent-color);
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.2);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: #f7fafc;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .card-size {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* Logo Position Buttons */
+        .position-bar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .pos-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .pos-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Preview Area */
+        .preview-container {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .preview-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 800px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .theme-card {
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            aspect-ratio: 1;
+        }
+
+        .theme-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-card.selected {
+            border-color: var(--accent-color);
+        }
+
+        .theme-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        /* Option Block */
+        .option-block {
+            padding: 15px 12px;
+            border: 1px solid #e4e7eb;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.25s ease;
+            overflow: hidden;
+        }
+
+        .option-block:hover {
+            border-color: #b3c0d1;
+            background: #fafbfc;
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-header label {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .toggle-field {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+        }
+
+        .toggle-field.show {
+            max-height: 300px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 12px;
+            border: 1px solid #ccd4dd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6c63ff;
+            box-shadow: 0 0 4px rgba(108, 99, 255, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Left Column: Inputs -->
+        <div class="column">
+            <div>
+                <h1>AI Image Studio</h1>
+                <p style="margin:0; opacity:0.7; font-size:14px;">Create stunning visuals with AI</p>
+            </div>
+
+            <div>
+                <label for="prompt">Prompt / Command</label>
+                <textarea id="prompt" placeholder="Describe the image you want to generate..."></textarea>
+            </div>
+
+            <!-- Uploads -->
+            <div>
+                <label>Assets (Optional)</label>
+                <div class="upload-row">
+                    <div class="upload-group">
+                        <span style="font-size:12px; display:block; margin-bottom:4px;">Company Logo</span>
+                        <div class="custom-file-input" onclick="document.getElementById('companyLogo').click()">
+                            <span>📁</span>
+                            <span id="companyLogoName" class="file-name">Choose file</span>
+                        </div>
+                        <input id="companyLogo" type="file" accept="image/*" onchange="updateName('companyLogo')">
+                    </div>
+
+                    <div class="upload-group">
+                        <span style="font-size:12px; display:block; margin-bottom:4px;">Product Image</span>
+                        <div class="custom-file-input" onclick="document.getElementById('productImage').click()">
+                            <span>📁</span>
+                            <span id="productImageName" class="file-name">Choose file</span>
+                        </div>
+                        <input id="productImage" type="file" accept="image/*" onchange="updateName('productImage')">
+                    </div>
+
+                    <div class="upload-group">
+                        <span style="font-size:12px; display:block; margin-bottom:4px;">Theme / Reference</span>
+                        <div style="display:flex; gap:5px;">
+                            <div class="custom-file-input" onclick="document.getElementById('referenceImage').click()"
+                                style="flex:1;">
+                                <span>📁</span>
+                                <span id="referenceImageName" class="file-name">Choose file</span>
+                            </div>
+                            <button type="button" class="ghost" onclick="openThemePopup()"
+                                style="padding: 8px 12px; font-size:16px;" title="Search Themes">🎨</button>
+                        </div>
+                        <input id="referenceImage" type="file" accept="image/*" onchange="updateName('referenceImage')"
+                            hidden>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slogan -->
+            <div>
+                <label>Message / Slogan</label>
+                <div class="option-block">
+                    <div class="option-header">
+                        <label>HeadLine</label>
+                        <input type="checkbox" data-toggle="headerField">
+                    </div>
+                    <div id="headerField" class="toggle-field">
+                        <input type="text" id="headerInput" placeholder="Enter header text...">
+                    </div>
+                </div>
+
+                <div class="option-block">
+                    <div class="option-header">
+                        <label>Body Text</label>
+                        <input type="checkbox" data-toggle="contentField">
+                    </div>
+                    <div id="contentField" class="toggle-field">
+                        <input type="text" id="contentInput" placeholder="Enter content text...">
+                    </div>
+                </div>
+
+                <div class="option-block">
+                    <div class="option-header">
+                        <label>Footer Text</label>
+                        <input type="checkbox" data-toggle="footerField">
+                    </div>
+                    <div id="footerField" class="toggle-field">
+                        <input type="text" id="footerInput" placeholder="Enter footer text...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logo Position -->
+            <div>
+                <label>Logo Position</label>
+                <div class="position-bar">
+                    <button class="pos-btn" onclick="selectPos(this,'Top-Left')">Top-Left</button>
+                    <button class="pos-btn" onclick="selectPos(this,'Top-Right')">Top-Right</button>
+                    <button class="pos-btn" onclick="selectPos(this,'Bottom-Left')">Bottom-Left</button>
+                    <button class="pos-btn" onclick="selectPos(this,'Bottom-Right')">Bottom-Right</button>
+                    <button class="pos-btn" onclick="selectPos(this,'Center')">Center</button>
+                </div>
+            </div>
+
+            <!-- Image Size -->
+            <div>
+                <label>Image Size</label>
+                <div class="carousel">
+                    <div class="card" onclick="selectSize(this, '1080x1080')">
+                        <img class="card-img" src="https://i.ibb.co/60r0q9dp/Social-Post.png" alt="Social Post">
+                        <div class="card-title">Social Post</div>
+                        <div class="card-size">1080x1080</div>
+                    </div>
+
+                    <div class="card" onclick="selectSize(this, '1080x1920')">
+                        <img class="card-img" src="https://i.ibb.co/bjLh04dH/Story-Post.png" alt="Story Post">
+                        <div class="card-title">Story Post</div>
+                        <div class="card-size">1080x1920</div>
+                    </div>
+
+                    <div class="card" onclick="selectSize(this, '1920x1080')">
+                        <img class="card-img" src="https://i.ibb.co/v4jZTbD7/Linkedin-Bannerblog.png" alt="Linkedin">
+                        <div class="card-title">Landscape</div>
+                        <div class="card-size">1920x1080</div>
+                    </div>
+
+                    <div class="card" onclick="selectSize(this, '2480x3508')">
+                        <img class="card-img" src="https://i.ibb.co/dJLmkdvp/FlyerA.jpg" alt="Flyer">
+                        <div class="card-title">Flyer A4</div>
+                        <div class="card-size">2480×3508</div>
+                    </div>
+
+                    <div class="card" onclick="selectCustomSize(this)">
+                        <img class="card-img" src="https://dummyimage.com/1024x1024/cccccc/000000.png&text=Custom"
+                            alt="Custom">
+                        <div class="card-title">Custom</div>
+                        <div class="card-size">
+                            <input type="text" id="customsize" placeholder="Size x Size"
+                                style="width: 80px; padding: 2px; border:none; background:transparent; text-align:center; font-size:10px;"
+                                onclick="event.stopPropagation()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="ghost" id="clearBtn">Refresh</button>
+                <button class="ghost" id="updateBtn">Edit / Update</button>
+                <button class="primary" id="sendBtn">✨ Generate</button>
+            </div>
+
+            <div class="status-bar">
+                <span id="status">Ready to create</span>
+                <span id="logArea" style="font-size:10px; opacity:0.6;"></span>
+            </div>
+        </div>
+
+        <!-- Right Column: Preview -->
+        <div class="column">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Preview</h2>
+                <div class="controls" style="margin-top:0;">
+                    <button id="downloadBtn" class="ghost"
+                        style="display:none; padding: 8px 16px; font-size:13px;">Download</button>
+                </div>
+            </div>
+
+            <div class="preview-container" id="previewArea">
+                <div style="text-align:center; color: var(--text-light);">
+                    <div style="font-size:40px; margin-bottom:10px;">🖼️</div>
+                    <p>Generated image will appear here</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 12px; font-size: 13px;">
+                <strong>Tip:</strong> Not satisfied? <br />Click <b>Edit / Update</b> to modify the image with new
+                instructions while keeping the current context.
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div id="themeModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Select Global Theme</h3>
+                <button class="ghost" onclick="closeThemePopup()" style="padding:5px 10px;">✕</button>
+            </div>
+
+            <input id="popupThemeSearch" placeholder="Search theme… (e.g., industrial, neon, modern)"
+                class="modal-input" />
+
+            <div id="popupThemeGrid" class="theme-grid">
+                <!-- Themes will load here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = "https://autoworkmotm.app.n8n.cloud/webhook/generation";
+        const SERPER_API_KEY = "f2ab0fbfb2ab9287a1b6d091fbd8adafb83f13c1";
+
+        // Elements
+        const promptEl = document.getElementById('prompt');
+        const sendBtn = document.getElementById('sendBtn');
+        const status = document.getElementById('status');
+        const logArea = document.getElementById('logArea');
+        const previewArea = document.getElementById('previewArea');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        const companyLogoEl = document.getElementById('companyLogo');
+        const productImageEl = document.getElementById('productImage');
+        const referenceImageEl = document.getElementById('referenceImage');
+
+        // State
+        let lastResponse = null;
+        let lastImageUrl = null;
+        let editingMode = false;
+        let staticTextActive = false;
+        const staticText = "Editing/Update: ";
+        let selectedTheme = null;
+        let selectedLogoPos = "";
+        let selectedSize = "";
+
+        // --- Helpers ---
+        function log(msg) {
+            logArea.textContent = new Date().toLocaleTimeString();
+            console.log(msg);
+        }
+
+        function setStatus(s) {
+            status.textContent = s;
+        }
+
+        function showLoading() {
+            previewArea.innerHTML = '<div class="spinner"></div><p style="margin-top:15px;">Dreaming up your image...</p>';
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Generating...';
+        }
+
+        function hideLoading() {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '✨ Generate';
+        }
+
+        // --- Event Listeners ---
+
+        // Prevent deleting prefix in edit mode
+        promptEl.addEventListener('keydown', (e) => {
+            if (staticTextActive && (promptEl.selectionStart <= staticText.length) &&
+                (e.key === "Backspace" || e.key === "Delete")) {
+                e.preventDefault();
+            }
+            // Shortcut
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendBtn.click();
+        });
+
+        // Clear
+        clearBtn.addEventListener('click', () => {
+            promptEl.value = "";
+            editingMode = false;
+            staticTextActive = false;
+            selectedLogoPos = "";
+            selectedSize = "";
+            selectedTheme = null;
+            lastImageUrl = null;
+
+
+            document.getElementById("headerInput").value = "";
+            document.getElementById("contentInput").value = "";
+            document.getElementById("footerInput").value = "";
+
+            document.querySelectorAll("[data-toggle]").forEach(toggle => {
+                toggle.checked = false;
+                const targetId = toggle.dataset.toggle;
+                const field = document.getElementById(targetId);
+                if (field) field.classList.remove("show"); // collapse
+            });
+
+
+            // Reset UI
+            document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            resetFileNames();
+
+            previewArea.innerHTML = `
+                <div style="text-align:center; color: var(--text-light);">
+                    <div style="font-size:40px; margin-bottom:10px;">🖼️</div>
+                    <p>Generated image will appear here</p>
+                </div>
+            `;
+            downloadBtn.style.display = 'none';
+            setStatus("Ready to create");
+        });
+
+        // Update / Edit Mode
+        updateBtn.addEventListener('click', () => {
+            editingMode = true;
+            staticTextActive = true;
+
+            if (!promptEl.value.startsWith(staticText)) {
+                promptEl.value = staticText + promptEl.value;
+            }
+
+            promptEl.focus();
+            promptEl.selectionStart = promptEl.selectionEnd = promptEl.value.length;
+            setStatus('Edit mode: Modify instructions and click Generate.');
+        });
+
+        // Generate
+        sendBtn.addEventListener('click', async () => {
+            const promptText = promptEl.value.trim();
+            if ((!promptText && !editingMode) || (staticTextActive && promptText === staticText)) {
+                alert('Please enter a prompt.');
+                return;
+            }
+
+            showLoading();
+            setStatus('Sending request...');
+
+            try {
+                const json = await postToWebhook(promptText, editingMode);
+                if (json) renderImageFromResponse(json);
+            } catch (e) {
+                setStatus("Error occurred");
+                previewArea.innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
+            } finally {
+                hideLoading();
+                editingMode = false;
+                staticTextActive = false;
+
+                promptEl.value = "";
+                selectedLogoPos = "";
+                selectedSize = "";
+                selectedTheme = null;
+
+                document.getElementById("headerInput").value = "";
+                document.getElementById("contentInput").value = "";
+                document.getElementById("footerInput").value = "";
+
+                document.querySelectorAll("[data-toggle]").forEach(toggle => {
+                    toggle.checked = false;
+                    const targetId = toggle.dataset.toggle;
+                    const field = document.getElementById(targetId);
+                    if (field) field.classList.remove("show"); // collapse
+                });
+
+                document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+                resetFileNames();
+            }
+        });
+
+        // --- Core Functions ---
+
+        async function postToWebhook(promptText, isEdit = false) {
+            const form = new FormData();
+            form.append('message', promptText || '');
+
+            if (selectedTheme) {
+                form.append('themeImage', selectedTheme.imageUrl);
+            }
+
+            if (isEdit) {
+                if (companyLogoEl.files[0]) form.append('companyLogo', companyLogoEl.files[0], companyLogoEl.files[0].name);
+                if (productImageEl.files[0]) form.append('productImage', productImageEl.files[0], productImageEl.files[0].name);
+                if (referenceImageEl.files[0]) form.append('referenceImage', referenceImageEl.files[0], referenceImageEl.files[0].name);
+
+                if (lastImageUrl) {
+                    form.append('isEdit', 'true');
+                    form.append('originalImageUrl', lastImageUrl);
+                }
+            }
+
+            const resp = await fetch(WEBHOOK_URL, { method: 'POST', body: form });
+            if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
+            return await resp.json();
+        }
+
+        function renderImageFromResponse(json) {
+            previewArea.innerHTML = '';
+            downloadBtn.style.display = 'none';
+
+            let urls = [];
+            if (Array.isArray(json)) {
+                urls = json.map(item => item.publicUrl || item.imageUrl).filter(Boolean);
+            } else if (json.imageUrl) {
+                urls = [json.imageUrl];
+            } else if (json.data?.imageUrl) {
+                urls = [json.data.imageUrl];
+            } else if (json.body?.imageUrl) {
+                urls = [json.body.imageUrl];
+            }
+
+            if (urls.length === 0) {
+                previewArea.innerHTML = "<p>No image found in response.</p>";
+                return;
+            }
+
+            lastImageUrl = urls[0];
+
+            const img = document.createElement('img');
+            img.src = lastImageUrl;
+            img.onload = () => setStatus("Image generated successfully!");
+            previewArea.appendChild(img);
+
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => window.open(lastImageUrl, '_blank');
+        }
+
+        // --- UI Logic ---
+
+        function updateName(id) {
+            const input = document.getElementById(id);
+            const nameSpan = document.getElementById(id + "Name");
+            nameSpan.textContent = input.files.length > 0 ? input.files[0].name : "Choose file";
+        }
+
+        function resetFileNames() {
+            ['companyLogo', 'productImage', 'referenceImage'].forEach(id => {
+                document.getElementById(id).value = "";
+                document.getElementById(id + "Name").textContent = "Choose file";
+            });
+        }
+
+        function updatePromptWithMeta(key, value) {
+            // Regex to find existing key: value line
+            const regex = new RegExp(`${key}:.*\\n?`, 'g');
+            let currentVal = promptEl.value.replace(regex, "").trim();
+
+            if (value) {
+                currentVal += `\n${key}: ${value}`;
+            }
+            promptEl.value = currentVal.trim();
+        }
+
+        function selectPos(btn, pos) {
+            document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedLogoPos = pos;
+            updatePromptWithMeta("Logo Position", pos);
+        }
+
+        function selectSize(card, size) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedSize = size;
+            updatePromptWithMeta("Image Size", size);
+        }
+
+        function selectCustomSize(card) {
+            const input = document.getElementById("customsize");
+            const val = input.value.trim();
+
+            if (!val) {
+                input.focus();
+                return;
+            }
+
+            // Normalize
+            let normalized = val.toLowerCase().replace(/×/g, "x").replace(/\s+/g, "");
+            if (!/^\d+x\d+$/.test(normalized)) {
+                alert("Format: 1024x1024");
+                return;
+            }
+
+            selectSize(card, normalized);
+        }
+
+        // Listen for custom size input changes to auto-select
+        document.getElementById("customsize").addEventListener("change", function () {
+            const card = this.closest('.card');
+            selectCustomSize(card);
+        });
+
+        // --- Theme Modal ---
+
+        function openThemePopup() {
+            const modal = document.getElementById('themeModal');
+            modal.style.display = 'flex';
+            // Trigger reflow
+            setTimeout(() => modal.classList.add('show'), 10);
+            loadPopupThemes("marketing theme");
+        }
+
+        function closeThemePopup() {
+            const modal = document.getElementById('themeModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        async function loadPopupThemes(keyword) {
+            const grid = document.getElementById("popupThemeGrid");
+            grid.innerHTML = '<div class="spinner" style="margin:20px auto;"></div>';
+
+            try {
+                const res = await fetch("https://google.serper.dev/images", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-API-KEY": SERPER_API_KEY
+                    },
+                    body: JSON.stringify({ q: `site:freepik.com ${keyword}`, num: 12 })
+                });
+
+                if (!res.ok) throw new Error("API Error");
+                const data = await res.json();
+
+                grid.innerHTML = "";
+                const themes = data.images || [];
+
+                if (themes.length === 0) {
+                    grid.innerHTML = "<p>No themes found.</p>";
+                    return;
+                }
+
+                themes.forEach(t => {
+                    const imgUrl = t.imageUrl || t.thumbnailUrl;
+                    if (!imgUrl) return;
+
+                    const card = document.createElement("div");
+                    card.className = "theme-card";
+                    card.innerHTML = `<img src="${imgUrl}" loading="lazy" alt="${t.title}">`;
+
+                    card.onclick = () => {
+                        document.querySelectorAll(".theme-card").forEach(c => c.classList.remove("selected"));
+                        card.classList.add("selected");
+                        selectedTheme = { imageUrl: imgUrl, title: t.title };
+                        document.getElementById("referenceImageName").textContent = "Theme Selected";
+                        setTimeout(closeThemePopup, 300);
+                    };
+                    grid.appendChild(card);
+                });
+
+            } catch (e) {
+                grid.innerHTML = "<p>Error loading themes.</p>";
+            }
+        }
+
+        document.getElementById("popupThemeSearch").addEventListener("keyup", e => {
+            if (e.target.value.length > 2) loadPopupThemes(e.target.value);
+        });
+
+        // Option Blocks Logic
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Toggle show/hide of fields
+            document.querySelectorAll("[data-toggle]").forEach(toggle => {
+                console.log("Toggle Found:", toggle);
+
+                toggle.addEventListener("change", (e) => {
+                    const targetId = e.target.dataset.toggle;
+                    console.log("Toggle Clicked:", targetId);
+
+                    const targetField = document.getElementById(targetId);
+                    console.log("Target Field Element:", targetField);
+
+                    if (targetField) {
+                        targetField.classList.toggle("show", e.target.checked);
+                    } else {
+                        console.error("❌ No element exists with ID:", targetId);
+                    }
+
+                    updateCombinedSlogan(); // update slogan when toggled
+                });
+            });
+
+            // Input listeners for text fields
+            ["headerInput", "contentInput", "footerInput"].forEach(id => {
+                document.getElementById(id).addEventListener("input", updateCombinedSlogan);
+            });
+
+        });
+
+
+        // Combine Header + Content + Footer text into final slogan
+        function updateCombinedSlogan() {
+            const header = document.getElementById("headerInput").value || "";
+            const content = document.getElementById("contentInput").value || "";
+            const footer = document.getElementById("footerInput").value || "";
+
+            if (document.querySelector('[data-toggle="headerField"]').checked) {
+                updatePromptWithMeta("HeadLine", header);
+            }
+
+            if (document.querySelector('[data-toggle="contentField"]').checked) {
+                updatePromptWithMeta("BodyText", content);
+            }
+
+            if (document.querySelector('[data-toggle="footerField"]').checked) {
+                updatePromptWithMeta("FooterText", footer);
+            }
+        }
+    </script>
+</body>
+
+</html>
