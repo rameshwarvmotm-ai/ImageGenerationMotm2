@@ -224,34 +224,38 @@
             scroll-behavior: smooth;
         }
 
+        .card-sized,
         .card {
             min-width: 140px;
             background: rgba(255, 255, 255, 0.7);
             border-radius: 16px;
-            padding: 8px;
+            padding: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid transparent;
             text-align: center;
         }
 
+        .card-sized:hover,
         .card:hover {
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.9);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
+        .card-sized.selected,
         .card.selected {
             border-color: var(--accent-color);
             background: #fff;
             box-shadow: 0 5px 15px rgba(118, 75, 162, 0.2);
         }
 
+        
         .card-img {
             width: 100%;
             height: 100px;
             object-fit: contain;
-            border-radius: 10px;
+            border-radius: 100px;
             background: #f7fafc;
             margin-bottom: 8px;
         }
@@ -493,7 +497,6 @@
 </head>
 
 <body>
-
     <div class="container">
         <!-- Left Column: Inputs -->
         <div class="column">
@@ -596,31 +599,31 @@
             <div>
                 <label>Image Size</label>
                 <div class="carousel">
-                    <div class="card" onclick="selectSize(this, '1080x1080')">
+                    <div class="card-sized" onclick="selectSize(this, '1080x1080')">
                         <img class="card-img" src="https://i.ibb.co/60r0q9dp/Social-Post.png" alt="Social Post">
                         <div class="card-title">Social Post</div>
                         <div class="card-size">1080x1080</div>
                     </div>
 
-                    <div class="card" onclick="selectSize(this, '1080x1920')">
+                    <div class="card-sized" onclick="selectSize(this, '1080x1920')">
                         <img class="card-img" src="https://i.ibb.co/bjLh04dH/Story-Post.png" alt="Story Post">
                         <div class="card-title">Story Post</div>
                         <div class="card-size">1080x1920</div>
                     </div>
 
-                    <div class="card" onclick="selectSize(this, '1920x1080')">
+                    <div class="card-sized" onclick="selectSize(this, '1920x1080')">
                         <img class="card-img" src="https://i.ibb.co/v4jZTbD7/Linkedin-Bannerblog.png" alt="Linkedin">
                         <div class="card-title">Landscape</div>
                         <div class="card-size">1920x1080</div>
                     </div>
 
-                    <div class="card" onclick="selectSize(this, '2480x3508')">
+                    <div class="card-sized" onclick="selectSize(this, '2480x3508')">
                         <img class="card-img" src="https://i.ibb.co/dJLmkdvp/FlyerA.jpg" alt="Flyer">
                         <div class="card-title">Flyer A4</div>
                         <div class="card-size">2480×3508</div>
                     </div>
 
-                    <div class="card" onclick="selectCustomSize(this)">
+                    <div class="card-sized" onclick="selectCustomSize(this)">
                         <img class="card-img" src="https://dummyimage.com/1024x1024/cccccc/000000.png&text=Custom"
                             alt="Custom">
                         <div class="card-title">Custom</div>
@@ -629,6 +632,56 @@
                                 style="width: 80px; padding: 2px; border:none; background:transparent; text-align:center; font-size:10px;"
                                 onclick="event.stopPropagation()">
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label>Image Style</label>
+                <div class="carousel">
+                    <div class="card" onclick="selectstyle(this,'Auto')">
+                        <img class="card-img" src="https://stablediffusionweb.com/_next/image?url=%2Fimages%2Fstyle_select%2F%E5%86%99%E5%AE%9E.jpg&w=256&q=75"/>
+                        <div class="card-title">Auto</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Corporate')">
+                        <img class="card-img" src="https://i.ibb.co/8g9gw44S/1-Corporate.png" alt="Corporate Style"/>
+                        <div class="card-title">Corporate</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Minimal')">
+                        <img class="card-img" src="https://i.ibb.co/JRV31frj/2Minimal.png" alt="Minimal Style"/>
+                        <div class="card-title">Minimal</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Creative')">
+                        <img class="card-img" src="https://i.ibb.co/Lz9yCYv4/3-Creative.jpg" alt="Creative Style" />
+                        <div class="card-title">Creative</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Bold')">
+                        <img class="card-img" src="https://i.ibb.co/4nrx0ZhX/4Bold.jpg" alt="Bold Style"/>
+                        <div class="card-title">Bold</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Modern')">
+                        <img class="card-img" src="https://i.ibb.co/1fGpxrjW/5Modern.jpg" alt="Modern Style" />
+                        <div class="card-title">Modern</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Futuristic')">
+                        <img class="card-img" src="https://i.ibb.co/VW29DKpc/6-Futuristic.jpg" alt="Futuristic Style" />
+                        <div class="card-title">Futuristic</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Creative+')">
+                        <img class="card-img" src="https://i.ibb.co/HDhx22MX/7-Creative.jpg" alt="Creative Style" />
+                        <div class="card-title">Creative+</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Typography')">
+                        <img class="card-img" src="https://i.ibb.co/TxR0VF5K/8-Typograpgy.jpg" alt="Typography Style"/>
+                        <div class="card-title">Typography</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Product Focused')">
+                        <img class="card-img" src="https://i.ibb.co/dsbWCZcC/9-Product-Focused.jpg" alt="Product-Focused Style"  />
+                        <div class="card-title">Product Focused</div>
+                    </div>
+                    <div class="card" onclick="selectstyle(this,'Social Media Native')">
+                        <img class="card-img" src="https://i.ibb.co/SwywNYn3/10Social.jpg" alt="Social Media Style" />
+                        <div class="card-title">Social Media Native</div>
                     </div>
                 </div>
             </div>
@@ -688,7 +741,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://autoworkmotm.app.n8n.cloud/webhook/generation";
+        const WEBHOOK_URL = "https://motmautowork.app.n8n.cloud/webhook/generation";
         const SERPER_API_KEY = "f2ab0fbfb2ab9287a1b6d091fbd8adafb83f13c1";
 
         // Elements
@@ -714,6 +767,7 @@
         let selectedTheme = null;
         let selectedLogoPos = "";
         let selectedSize = "";
+        let selectedStyle = "";
 
         // --- Helpers ---
         function log(msg) {
@@ -755,6 +809,7 @@
             staticTextActive = false;
             selectedLogoPos = "";
             selectedSize = "";
+            selectedStyle = "";
             selectedTheme = null;
             lastImageUrl = null;
 
@@ -825,6 +880,7 @@
                 promptEl.value = "";
                 selectedLogoPos = "";
                 selectedSize = "";
+                selectedStyle = "";
                 selectedTheme = null;
 
                 document.getElementById("headerInput").value = "";
@@ -935,11 +991,19 @@
         }
 
         function selectSize(card, size) {
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.card-sized').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedSize = size;
             updatePromptWithMeta("Image Size", size);
         }
+
+        function selectstyle(card, style) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedStyle = style;
+            updatePromptWithMeta("Image Style", style);
+        }
+
 
         function selectCustomSize(card) {
             const input = document.getElementById("customsize");
