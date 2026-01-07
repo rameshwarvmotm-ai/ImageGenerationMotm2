@@ -741,7 +741,7 @@
             <!-- Controls -->
             <div class="controls">
                 <button class="ghost" id="clearBtn">Refresh</button>
-                <button class="ghost" id="cropedit">Crop Edit</button>
+                <button class="ghost" id="cropedit">Area Edit</button>
                 <button class="ghost" id="updateBtn">Edit / Update</button>
                 <button class="primary" id="sendBtn">✨ Generate</button>
             </div>
@@ -1046,7 +1046,7 @@
 
         }
 
-        //Crop Edit Button
+        //Area Edit Button
         document.getElementById("cropedit").addEventListener("click", () => {
             if (!lastImageUrl) {
                 alert("No image available to edit");
@@ -1055,7 +1055,7 @@
 
             const encodedUrl = encodeURIComponent(lastImageUrl);
             window.open(
-                `http://127.0.0.1:5500/index.html?imageUrl=${encodedUrl}`,
+                `https://rameshwarvmotm-ai.github.io/ImageEdit/?imageUrl=${encodedUrl}`,
                 "_blank"
             );
         });
@@ -1352,3 +1352,4 @@
 </body>
 
 </html>
+
