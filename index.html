@@ -1302,6 +1302,31 @@
             );
         }
 
+        // enhancePromptBtn.addEventListener("click", async () => {
+        //     const currentPrompt = promptEl.value.trim();
+
+        //     if (!currentPrompt) {
+        //         alert("Please enter a prompt..");
+        //         return;
+        //     }
+        //     enhancePromptBtn.disabled = true;
+        //     enhancePromptBtn.textContent = "Generating...";
+        //     setStatus("Enhancing prompt with AI...");
+
+        //     try {
+        //         const enhanced = await enhancePromptWithAI(currentPrompt);
+        //         // promptEl.value = enhanced;
+        //         typeWordByWord(promptEl, enhanced, 50);
+        //         setStatus("Prompt enhanced successfully");
+        //     } catch (e) {
+        //         console.error(e);
+        //         alert("Failed to enhance prompt");
+        //     } finally {
+        //         enhancePromptBtn.disabled = false;
+        //         enhancePromptBtn.textContent = "✨ AI Prompt";
+        //     }
+        // });
+
         enhancePromptBtn.addEventListener("click", async () => {
             const currentPrompt = promptEl.value.trim();
 
@@ -1309,15 +1334,26 @@
                 alert("Please enter a prompt..");
                 return;
             }
+
             enhancePromptBtn.disabled = true;
             enhancePromptBtn.textContent = "Generating...";
             setStatus("Enhancing prompt with AI...");
 
             try {
-                const enhanced = await enhancePromptWithAI(currentPrompt);
-                // promptEl.value = enhanced;
+                let enhanced;
+
+                if (currentPrompt.startsWith(staticText)) {
+
+                    const airesponse = await enhancePromptWithAI(currentPrompt);
+
+                    enhanced = staticText + airesponse;
+                } else {
+                    enhanced = await enhancePromptWithAI(currentPrompt);
+                }
+
                 typeWordByWord(promptEl, enhanced, 50);
                 setStatus("Prompt enhanced successfully");
+
             } catch (e) {
                 console.error(e);
                 alert("Failed to enhance prompt");
@@ -1354,5 +1390,6 @@
 </body>
 
 </html>
+
 
 
